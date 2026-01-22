@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Helper to run the project Gradle wrapper using the WPILib JDK located in each
+# user's home directory. This avoids committing a repo-local absolute path.
+#
+# Usage: ./gradlew-wpilib [gradle-args]
+
+set -euo pipefail
+
+# Allow override with env var WPILIB_JDK for nonstandard installs
+JDK_PATH="${WPILIB_JDK:-$HOME/wpilib/2026/jdk}"
+
+if [ ! -d "$JDK_PATH" ]; then
+  echo "ERROR: JDK path not found: $JDK_PATH"
+  echo "Set WPILIB_JDK or install WPILib JDK at $HOME/wpilib/2026/jdk"
+  exit 1
+fi
+
+echo "Using JDK: $JDK_PATH"
+# Forward all args to the project's Gradle wrapper
+exec ./gradlew -Dorg.gradle.java.home="$JDK_PATH" "$@"

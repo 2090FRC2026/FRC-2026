@@ -4,29 +4,52 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
  * the TimedRobot documentation. If you change the name of this class or the package after creating
  * this project, you must also update the Main.java file in the project.
  */
-public class Robot extends TimedRobot {
-  private static final String kDefaultAuto = "Default";
-  private static final String kCustomAuto = "My Auto";
-  private String m_autoSelected;
-  private final SendableChooser<String> m_chooser = new SendableChooser<>();
+public class Robot extends TimedRobot
+{
+  private static Robot instance;
+  private Command m_autonomousCommand;
+  private RobotContainer m_robotContainer;
+  private Timer disabledTimer;
 
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
    */
-  public Robot() {
-    m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
-    m_chooser.addOption("My Auto", kCustomAuto);
-    SmartDashboard.putData("Auto choices", m_chooser);
+  public Robot()
+  {
+    instance = this;
+  }
+
+  public static Robot getInstance()
+  {
+    return instance;
+  }
+
+  /**
+   * This function is run when the robot is first started up and should be used for any
+   * initialization code.
+   */
+  @Override
+  public void robotInit()
+  {
+    m_robotContainer = new RobotContainer();
+    disabledTimer = new Timer();
+
+    if (isSimulation())
+    {
+      DriverStation.silenceJoystickConnectionWarning(true);
+    }
   }
 
   /**
@@ -37,7 +60,10 @@ public class Robot extends TimedRobot {
    * SmartDashboard integrated updating.
    */
   @Override
-  public void robotPeriodic() {}
+  public void robotPeriodic()
+  {
+    CommandScheduler.getInstance().run();
+  }
 
   /**
    * This autonomous (along with the chooser code above) shows how to select between different
@@ -50,55 +76,76 @@ public class Robot extends TimedRobot {
    * chooser code above as well.
    */
   @Override
-  public void autonomousInit() {
-    m_autoSelected = m_chooser.getSelected();
-    // m_autoSelected = SmartDashboard.getString("Auto Selector", kDefaultAuto);
-    System.out.println("Auto selected: " + m_autoSelected);
+  public void disabledInit()
+  {
+    m_robotContainer.setMotorBrake(true);
+    disabledTimer.reset();
+    disabledTimer.start();
   }
 
-  /** This function is called periodically during autonomous. */
   @Override
-  public void autonomousPeriodic() {
-    switch (m_autoSelected) {
-      case kCustomAuto:
-        // Put custom auto code here
-        break;
-      case kDefaultAuto:
-      default:
-        // Put default auto code here
-        break;
+  public void disabledPeriodic()
+  {
+    if (disabledTimer.hasElapsed(Constants.DrivebaseConstants.WHEEL_LOCK_TIME))
+    {
+      m_robotContainer.setMotorBrake(false);
+      disabledTimer.stop();
+      disabledTimer.reset();
     }
   }
 
-  /** This function is called once when teleop is enabled. */
   @Override
-  public void teleopInit() {}
+  public void autonomousInit()
+  {
+    m_robotContainer.setMotorBrake(true);
+    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
-  /** This function is called periodically during operator control. */
-  @Override
-  public void teleopPeriodic() {}
+    if (m_autonomousCommand != null)
+    {
+      m_autonomousCommand.schedule();
+    }
+  }
 
-  /** This function is called once when the robot is disabled. */
   @Override
-  public void disabledInit() {}
+  public void autonomousPeriodic()
+  {
+  }
 
-  /** This function is called periodically when disabled. */
   @Override
-  public void disabledPeriodic() {}
+  public void teleopInit()
+  {
+    if (m_autonomousCommand != null)
+    {
+      m_autonomousCommand.cancel();
+    } else
+    {
+      CommandScheduler.getInstance().cancelAll();
+    }
+  }
 
-  /** This function is called once when test mode is enabled. */
   @Override
-  public void testInit() {}
+  public void teleopPeriodic()
+  {
+  }
 
-  /** This function is called periodically during test mode. */
   @Override
-  public void testPeriodic() {}
+  public void testInit()
+  {
+    CommandScheduler.getInstance().cancelAll();
+  }
 
-  /** This function is called once when the robot is first started up. */
   @Override
-  public void simulationInit() {}
+  public void testPeriodic()
+  {
+  }
 
-  /** This function is called periodically whilst in simulation. */
   @Override
-  public void simulationPeriodic() {}
+  public void simulationInit()
+  {
+  }
+
+  @Override
+  public void simulationPeriodic()
+  {
+  }
 }
