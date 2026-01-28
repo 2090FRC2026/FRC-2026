@@ -40,7 +40,7 @@ public class SingleMotorTest extends SubsystemBase {
 
   public void setPower(double power) {
     motor.setControl(dutyCycle.withOutput(MathUtil.clamp(power, -1.0, 1.0)));
-    motor2.setControl(dutyCycle.withOutput(MathUtil.clamp(power, -1.0, 1.0)));
+    motor2.setControl(dutyCycle.withOutput(MathUtil.clamp(-power, -1.0, 1.0)));
   }
 
   public void stop() {
