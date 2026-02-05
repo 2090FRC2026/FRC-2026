@@ -24,7 +24,8 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.subsystems.SingleMotorTest;
+import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import java.io.File;
 
@@ -48,7 +49,8 @@ public class RobotContainer {
   private final SwerveSubsystem drivebase = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
       "swerve/falcon"));
 
-  private final SingleMotorTest shooter = new SingleMotorTest();
+  private final Shooter shooter = new Shooter();
+  private final Intake intake = new Intake();
 
   // Establish a Sendable Chooser that will be able to be sent to the
   // SmartDashboard, allowing selection of desired auto
@@ -155,6 +157,9 @@ public class RobotContainer {
     Command driveFieldOrientedAnglularVelocityKeyboard = drivebase.driveFieldOriented(driveAngularVelocityKeyboard);
     driverXbox.a().whileTrue(shooter.runMotors());
 
+    driverXbox.rightTrigger().whileTrue(intake.intakeCommand());
+    driverXbox.leftTrigger().whileTrue(intake.outtakeCommand());
+
 
     if (RobotBase.isSimulation()) {
       drivebase.setDefaultCommand(driveFieldOrientedDirectAngleKeyboard);
@@ -197,7 +202,7 @@ public class RobotContainer {
       driverXbox.back().whileTrue(Commands.none());
       driverXbox.leftBumper().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
       driverXbox.rightBumper().onTrue(Commands.none());
-      Commands.runOnce(shooter::runMotors);
+      //Commands.runOnce(shooter::runMotors);
     }
 
   }
