@@ -25,12 +25,17 @@ public class Shooter extends SubsystemBase {
   private static final int MOTOR1_ID = 11;
   private static final int MOTOR2_ID = 13;
 
-  // Velocity PID constants (tune these for your shooter)
-  private static final double kP = 0.11;  // Proportional gain
+  // Square Root Velocity PIDF constants
+  // The motor's built-in velocity PID handles the base control,
+  // we add sqrt-based feedforward for aggressive approach
+  private static final double kP = 0.11;  // Proportional gain for velocity PID
   private static final double kI = 0.0;   // Integral gain
   private static final double kD = 0.0;   // Derivative gain
   private static final double kV = 0.12;  // Feedforward velocity gain (volts per RPS)
   private static final double kS = 0.25;  // Feedforward static friction (volts)
+  
+  // Square root feedforward tuning - adds extra push based on sqrt of error
+  private static final double kSqrtFF = 0.15;  // Sqrt feedforward gain (volts per sqrt(RPM error))
 
   // Target RPM presets
   public static final double SHOOTER_RPM = 3000.0;
@@ -49,7 +54,7 @@ public class Shooter extends SubsystemBase {
     motor = new TalonFX(MOTOR1_ID);
     motor2 = new TalonFX(MOTOR2_ID);
 
-    // Configure velocity PID
+    // Configure velocity PID gains
     config.Slot0.kP = kP;
     config.Slot0.kI = kI;
     config.Slot0.kD = kD;
@@ -70,16 +75,36 @@ public class Shooter extends SubsystemBase {
   }
 
   /**
-   * Set both motors to a target RPM using velocity PID.
+   * Calculate square root feedforward based on velocity error.
+   * This provides aggressive correction when far from target,
+   * and smooth correction when close.
+   * @param errorRPM Velocity error in RPM (target - current)
+   * @return Additional feedforward voltage
+   */
+  private double calculateSqrtFeedforward(double errorRPM) {
+    // Apply sqrt to error magnitude, preserve sign
+    // sqrt(error) is more aggressive far from target, smoother near target
+    return kSqrtFF * Math.signum(errorRPM) * Math.sqrt(Math.abs(errorRPM));
+  }
+
+  /**
+   * Set both motors to a target RPM using velocity control with sqrt feedforward.
    * Motor2 runs in the opposite direction.
    * @param rpm Target RPM (positive = intake direction)
    */
   public void setRPM(double rpm) {
     targetRPM = rpm;
     // Convert RPM to rotations per second (TalonFX velocity is in RPS)
-    double rps = rpm / 60.0;
-    motor.setControl(velocityControl.withVelocity(rps));
-    motor2.setControl(velocityControl.withVelocity(-rps)); // Opposite direction
+    double targetRPS = rpm / 60.0;
+    
+    // Calculate current error for sqrt feedforward
+    double currentRPM = getVelocityRPM();
+    double errorRPM = rpm - currentRPM;
+    double sqrtFF = calculateSqrtFeedforward(errorRPM);
+    
+    // Use velocity control with additional sqrt-based feedforward
+    motor.setControl(velocityControl.withVelocity(targetRPS).withFeedForward(sqrtFF));
+    motor2.setControl(velocityControl.withVelocity(-targetRPS).withFeedForward(-sqrtFF));
   }
 
   /**
@@ -139,6 +164,21 @@ public class Shooter extends SubsystemBase {
 
   @Override
   public void periodic() {
+    // Continuously update velocity control with fresh sqrt feedforward
+    if (targetRPM != 0.0) {
+      double targetRPS = targetRPM / 60.0;
+      double currentRPM = getVelocityRPM();
+      double errorRPM = targetRPM - currentRPM;
+      double sqrtFF = calculateSqrtFeedforward(errorRPM);
+      
+      // Update velocity control with current sqrt feedforward
+      motor.setControl(velocityControl.withVelocity(targetRPS).withFeedForward(sqrtFF));
+      motor2.setControl(velocityControl.withVelocity(-targetRPS).withFeedForward(-sqrtFF));
+      
+      SmartDashboard.putNumber("Shooter Sqrt FF", sqrtFF);
+      SmartDashboard.putNumber("Shooter Error", errorRPM);
+    }
+    
     SmartDashboard.putNumber(kAppliedOutputEntry, motor.getDutyCycle().getValueAsDouble());
     SmartDashboard.putNumber(kVelocityEntry, getVelocityRPM());
     SmartDashboard.putNumber(kTargetVelocityEntry, targetRPM);
