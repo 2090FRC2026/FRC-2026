@@ -172,8 +172,8 @@ public class Shooter extends SubsystemBase {
       double sqrtFF = calculateSqrtFeedforward(errorRPM);
       
       // Update velocity control with current sqrt feedforward
-      motor.setControl(velocityControl.withVelocity(targetRPS).withFeedForward(sqrtFF));
-      motor2.setControl(velocityControl.withVelocity(-targetRPS).withFeedForward(-sqrtFF));
+      // motor.setControl(velocityControl.withVelocity(targetRPS).withFeedForward(sqrtFF));
+      // motor2.setControl(velocityControl.withVelocity(-targetRPS).withFeedForward(-sqrtFF));
       
       SmartDashboard.putNumber("Shooter Sqrt FF", sqrtFF);
       SmartDashboard.putNumber("Shooter Error", errorRPM);
@@ -215,7 +215,7 @@ public class Shooter extends SubsystemBase {
    * Command to run motors at a fixed power (open loop).
    */
   public Command runMotors() {
-    return run(() -> this.setPower(0.05));
+    return run(() -> this.setPower(0.5));
   }
 
   /**

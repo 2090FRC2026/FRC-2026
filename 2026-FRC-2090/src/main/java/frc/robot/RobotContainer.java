@@ -155,7 +155,6 @@ public class RobotContainer {
     Command driveRobotOrientedAngularVelocity = drivebase.driveFieldOriented(driveRobotOriented);
     Command driveFieldOrientedDirectAngleKeyboard = drivebase.driveFieldOriented(driveDirectAngleKeyboard);
     Command driveFieldOrientedAnglularVelocityKeyboard = drivebase.driveFieldOriented(driveAngularVelocityKeyboard);
-    driverXbox.a().whileTrue(shooter.runMotors());
 
     driverXbox.rightTrigger().whileTrue(intake.intakeCommand());
     driverXbox.leftTrigger().whileTrue(intake.outtakeCommand());
@@ -202,7 +201,7 @@ public class RobotContainer {
       driverXbox.back().whileTrue(Commands.none());
       driverXbox.leftBumper().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
       driverXbox.rightBumper().onTrue(Commands.none());
-      //Commands.runOnce(shooter::runMotors);
+      driverXbox.a().onTrue(shooter.runMotors());
     }
 
   }
