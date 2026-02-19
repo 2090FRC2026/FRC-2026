@@ -70,6 +70,8 @@ public class Shooter extends SubsystemBase {
     motor.setPosition(0.0);
     motor2.setPosition(0.0);
 
+    stop();
+
     // Configure velocity control to use Slot 0
     velocityControl.Slot = 0;
   }
@@ -172,8 +174,8 @@ public class Shooter extends SubsystemBase {
       double sqrtFF = calculateSqrtFeedforward(errorRPM);
       
       // Update velocity control with current sqrt feedforward
-      motor.setControl(velocityControl.withVelocity(targetRPS).withFeedForward(sqrtFF));
-      motor2.setControl(velocityControl.withVelocity(-targetRPS).withFeedForward(-sqrtFF));
+      // motor.setControl(velocityControl.withVelocity(targetRPS).withFeedForward(sqrtFF));
+      // motor2.setControl(velocityControl.withVelocity(-targetRPS).withFeedForward(-sqrtFF));
       
       SmartDashboard.putNumber("Shooter Sqrt FF", sqrtFF);
       SmartDashboard.putNumber("Shooter Error", errorRPM);
@@ -215,7 +217,8 @@ public class Shooter extends SubsystemBase {
    * Command to run motors at a fixed power (open loop).
    */
   public Command runMotors() {
-    return run(() -> this.setPower(0.05));
+    return run(() -> this.setPower(0.5))
+        .finallyDo(() -> this.stop());
   }
 
   /**
