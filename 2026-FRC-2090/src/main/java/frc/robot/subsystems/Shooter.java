@@ -28,14 +28,14 @@ public class Shooter extends SubsystemBase {
   // Square Root Velocity PIDF constants
   // The motor's built-in velocity PID handles the base control,
   // we add sqrt-based feedforward for aggressive approach
-  private static final double kP = 0.11;  // Proportional gain for velocity PID
+  private static final double kP = 0.08;  // Proportional gain for velocity PID
   private static final double kI = 0.0;   // Integral gain
-  private static final double kD = 0.0;   // Derivative gain
-  private static final double kV = 0.12;  // Feedforward velocity gain (volts per RPS)
-  private static final double kS = 0.25;  // Feedforward static friction (volts)
+  private static final double kD = 0.05;   // Derivative gain
+  private static final double kV = 0.001;  // Feedforward velocity gain (volts per RPS)
+  private static final double kS = 0.001;  // Feedforward static friction (volts)
   
   // Square root feedforward tuning - adds extra push based on sqrt of error
-  private static final double kSqrtFF = 0.15;  // Sqrt feedforward gain (volts per sqrt(RPM error))
+  private static final double kSqrtFF = 0.08;  // Sqrt feedforward gain (volts per sqrt(RPM error))
 
   // Target RPM presets
   public static final double SHOOTER_RPM = 3000.0;
@@ -62,7 +62,7 @@ public class Shooter extends SubsystemBase {
     config.Slot0.kS = kS;
 
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-    config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
     motor.getConfigurator().apply(config);
     motor2.getConfigurator().apply(config);
@@ -101,7 +101,7 @@ public class Shooter extends SubsystemBase {
     
     // Calculate current error for sqrt feedforward
     double currentRPM = getVelocityRPM();
-    double errorRPM = rpm - currentRPM;
+    double errorRPM = Math.abs(rpm - currentRPM);
     double sqrtFF = calculateSqrtFeedforward(errorRPM);
     
     // Use velocity control with additional sqrt-based feedforward
@@ -151,7 +151,7 @@ public class Shooter extends SubsystemBase {
    * @return true if at target
    */
   public boolean atTargetRPM() {
-    return atTargetRPM(100.0);
+    return atTargetRPM(10.0);
   }
 
   /**
@@ -174,8 +174,8 @@ public class Shooter extends SubsystemBase {
       double sqrtFF = calculateSqrtFeedforward(errorRPM);
       
       // Update velocity control with current sqrt feedforward
-      // motor.setControl(velocityControl.withVelocity(targetRPS).withFeedForward(sqrtFF));
-      // motor2.setControl(velocityControl.withVelocity(-targetRPS).withFeedForward(-sqrtFF));
+      motor.setControl(velocityControl.withVelocity(targetRPS).withFeedForward(sqrtFF));
+      motor2.setControl(velocityControl.withVelocity(-targetRPS).withFeedForward(-sqrtFF));
       
       SmartDashboard.putNumber("Shooter Sqrt FF", sqrtFF);
       SmartDashboard.putNumber("Shooter Error", errorRPM);
@@ -217,7 +217,7 @@ public class Shooter extends SubsystemBase {
    * Command to run motors at a fixed power (open loop).
    */
   public Command runMotors() {
-    return run(() -> this.setPower(0.5))
+    return run(() -> this.setPower(0.7))
         .finallyDo(() -> this.stop());
   }
 
