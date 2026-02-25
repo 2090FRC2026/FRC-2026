@@ -201,7 +201,7 @@ public class RobotContainer {
       driverXbox.back().whileTrue(Commands.none());
       driverXbox.leftBumper().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
       driverXbox.rightBumper().onTrue(Commands.none());
-      driverXbox.y().whileTrue(shooter.runAtRPM(1500));  
+      driverXbox.y().whileTrue(shooter.runAtRPM(3000));  
       driverXbox.b().whileTrue(shooter.runMotors());
     }
 

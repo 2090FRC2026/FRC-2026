@@ -27,11 +27,11 @@ public class Shooter extends SubsystemBase {
 
   // Velocity PIDF constants
   // The motor's built-in velocity PID handles the control
-  private static final double kP = 0.05;  // Proportional gain for velocity PID 
+  private static final double kP = 0.22;//0.00004  // Proportional gain for velocity PID // 0.006
   private static final double kI = 0.0;   // Integral gain
-  private static final double kD = 0.0;   // Derivative gain (set to 0 - can cause oscillation with velocity control)
-  private static final double kV = 0.12;  // Feedforward velocity gain (volts per RPS)
-  private static final double kS = 0.1;   // Feedforward static friction (volts)
+  private static final double kD = 0.0;   // Derivative gain (set to 0 - can cause oscillation with velocity control) // 036
+  private static final double kV = 0.1163;  // Feedforward velocity gain (volts per RPS) // 0.1166 - KEEP
+  private static final double kS = 0.1;   // Feedforward static friction (volts) // 0.1
 
   // Target RPM presets
   public static final double SHOOTER_RPM = 3000.0;
