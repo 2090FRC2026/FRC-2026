@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -21,12 +22,13 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.subsystems.Hood;
+import frc.robot.Constants.ShooterConstants;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
-import frc.robot.subsystems.Transfer;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import java.io.File;
+
+import java.util.function.DoubleSupplier;
 
 import swervelib.SwerveInputStream;
 
@@ -48,8 +50,6 @@ public class RobotContainer {
 
   private final Shooter shooter = new Shooter();
   private final Intake intake = new Intake();
-  private final Hood hood = new Hood();
-  private final Transfer transfer = new Transfer();
 
   // Establish a Sendable Chooser that will be able to be sent to the
   // SmartDashboard, allowing selection of desired auto
@@ -149,14 +149,22 @@ public class RobotContainer {
    * Flight joysticks}.
    */
   private void configureBindings() {
-    Command driveFieldOrientedDirectAngle = drivebase.driveFieldOriented(driveDirectAngle);
     Command driveFieldOrientedAnglularVelocity = drivebase.driveFieldOriented(driveAngularVelocity);
-    Command driveRobotOrientedAngularVelocity = drivebase.driveFieldOriented(driveRobotOriented);
     Command driveFieldOrientedDirectAngleKeyboard = drivebase.driveFieldOriented(driveDirectAngleKeyboard);
-    Command driveFieldOrientedAnglularVelocityKeyboard = drivebase.driveFieldOriented(driveAngularVelocityKeyboard);
 
-    driverXbox.rightTrigger().whileTrue(hood.variableHoodCommand(() -> driverXbox.getRightTriggerAxis()));
-    driverXbox.leftTrigger().whileTrue(hood.variableHoodCommand(() -> -driverXbox.getLeftTriggerAxis()));
+    final DoubleSupplier shooterRpmFromTriggers = () -> {
+      double right = MathUtil.applyDeadband(driverXbox.getHID().getRightTriggerAxis(), ShooterConstants.TRIGGER_DEADBAND);
+      double left = MathUtil.applyDeadband(driverXbox.getHID().getLeftTriggerAxis(), ShooterConstants.TRIGGER_DEADBAND);
+
+      double rpm = ShooterConstants.BASE_RPM + (right - left) * ShooterConstants.MAX_DELTA_RPM;
+      return MathUtil.clamp(rpm, ShooterConstants.MIN_RPM, ShooterConstants.MAX_RPM);
+    };
+
+    shooter.setDefaultCommand(shooter.runAtRPM(shooterRpmFromTriggers));
+
+    // Hood control: hold bumpers to move, release to stop
+    driverXbox.leftBumper().whileTrue(shooter.hoodDownWhileHeld());
+    driverXbox.rightBumper().whileTrue(shooter.hoodUpWhileHeld());
 
 
     if (RobotBase.isSimulation()) {
@@ -195,14 +203,11 @@ public class RobotContainer {
       driverXbox.leftBumper().onTrue(Commands.none());
       driverXbox.rightBumper().onTrue(Commands.none());
     } else {
-      driverXbox.a().onTrue((Commands.runOnce(drivebase::zeroGyro)));
-      driverXbox.start().whileTrue(Commands.none());
+      driverXbox.start().onTrue((Commands.runOnce(drivebase::zeroGyro)));
       driverXbox.back().whileTrue(Commands.none());
-      driverXbox.leftBumper().whileTrue(intake.intakeCommand());
-      driverXbox.rightBumper().whileTrue(intake.outtakeCommand());
-      driverXbox.y().whileTrue(shooter.runAtRPM(5000));
-      driverXbox.b().whileTrue(transfer.transferCommand());
       driverXbox.x().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
+      driverXbox.a().whileTrue(intake.intakeCommand());
+      driverXbox.b().whileTrue(intake.outtakeCommand());
     }
 
   }
