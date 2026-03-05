@@ -48,20 +48,4 @@ public final class Constants
     public static final double RIGHT_X_DEADBAND = 0.1;
     public static final double TURN_CONSTANT    = 6;
   }
-
-  public static final class ShooterConstants
-  {
-    // base shooter RPM when triggers are neutral
-    public static final double BASE_RPM = 500.0;
-
-    // Max RPM change applied when one trigger is fully pressed
-    public static final double MAX_DELTA_RPM = 1500.0;
-
-    /** Clamp range for commanded shooter RPM. */
-    public static final double MIN_RPM = 0.0;
-    public static final double MAX_RPM = 6000.0;
-
-    // small deadband to prevent trigger noise from jittering the setpoint
-    public static final double TRIGGER_DEADBAND = 0.05;
-  }
 }

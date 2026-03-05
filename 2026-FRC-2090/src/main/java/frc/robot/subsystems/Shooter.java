@@ -15,18 +15,14 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-import java.util.function.DoubleSupplier;
-
 public class Shooter extends SubsystemBase {
   private static final String kAppliedOutputEntry = "Shooter Applied Output";
   private static final String kVelocityEntry = "Shooter Velocity (RPM)";
   private static final String kTargetVelocityEntry = "Shooter Target RPM";
-  private static final String kHoodOutputEntry = "Shooter Hood Output";
 
   // Motor CAN IDs
   private static final int MOTOR1_ID = 11;
   private static final int MOTOR2_ID = 13;
-  private static final int MOTOR3_ID = 15; // Hood adjust motor
 
   // Velocity PIDF constants
   // The motor's built-in velocity PID handles the control
@@ -40,14 +36,10 @@ public class Shooter extends SubsystemBase {
   public static final double SHOOTER_RPM = 3000.0;
   public static final double SHOOTER_RPM_LOW = 1500.0;
 
-  // Hood manual power (tune later)
-  public static final double HOOD_MANUAL_POWER = 0.05;
-
   private final TalonFX motor;
   private final TalonFX motor2;
-  private final TalonFX motor3;
+
   private final DutyCycleOut dutyCycle = new DutyCycleOut(0.0);
-  private final DutyCycleOut hoodDutyCycle = new DutyCycleOut(0.0);
   private final VelocityVoltage velocityControl = new VelocityVoltage(0.0);
   private final TalonFXConfiguration config = new TalonFXConfiguration();
 
@@ -56,7 +48,7 @@ public class Shooter extends SubsystemBase {
   public Shooter() {
     motor = new TalonFX(MOTOR1_ID);
     motor2 = new TalonFX(MOTOR2_ID);
-    motor3 = new TalonFX(MOTOR3_ID);
+
     // Configure velocity PID gains
     config.Slot0.kP = kP;
     config.Slot0.kI = kI;
@@ -70,28 +62,13 @@ public class Shooter extends SubsystemBase {
     motor.getConfigurator().apply(config);
     motor2.getConfigurator().apply(config);
 
-    // Hood motor defaults (tune inversion + neutral mode later)
-    motor3.setNeutralMode(NeutralModeValue.Brake);
-
     motor.setPosition(0.0);
     motor2.setPosition(0.0);
-    motor3.setPosition(0.0);
 
     stop();
 
     // Configure velocity control to use Slot 0
     velocityControl.Slot = 0;
-
-    stopHood();
-  }
-
-  /** Manual hood control (hold-to-move). Positive/negative direction may need flipping. */
-  public void setHoodPower(double power) {
-    motor3.setControl(hoodDutyCycle.withOutput(MathUtil.clamp(power, -1.0, 1.0)));
-  }
-
-  public void stopHood() {
-    setHoodPower(0.0);
   }
 
   /**
@@ -168,7 +145,6 @@ public class Shooter extends SubsystemBase {
     SmartDashboard.putNumber(kAppliedOutputEntry, motor.getDutyCycle().getValueAsDouble());
     SmartDashboard.putNumber(kVelocityEntry, getVelocityRPM());
     SmartDashboard.putNumber(kTargetVelocityEntry, targetRPM);
-    SmartDashboard.putNumber(kHoodOutputEntry, motor3.getDutyCycle().getValueAsDouble());
   }
 
   // ===== Commands =====
@@ -191,15 +167,6 @@ public class Shooter extends SubsystemBase {
   }
 
   /**
-   * Command to run the shooter at a continuously-updated RPM.
-   * @param rpmSupplier Supplies the desired RPM each scheduler loop
-   */
-  public Command runAtRPM(DoubleSupplier rpmSupplier) {
-    return run(() -> this.setRPM(rpmSupplier.getAsDouble()))
-        .finallyDo(() -> this.stop());
-  }
-
-  /**
    * Command to run the shooter at low speed.
    */
   public Command runAtLowRPM() {
@@ -214,15 +181,5 @@ public class Shooter extends SubsystemBase {
   public Command spinUpAndWait(double rpm) {
     return runOnce(() -> this.setRPM(rpm))
         .andThen(run(() -> {}).until(() -> this.atTargetRPM()));
-  }
-
-  public Command hoodUpWhileHeld() {
-    return run(() -> setHoodPower(HOOD_MANUAL_POWER))
-        .finallyDo(this::stopHood);
-  }
-
-  public Command hoodDownWhileHeld() {
-    return run(() -> setHoodPower(-HOOD_MANUAL_POWER))
-        .finallyDo(this::stopHood);
   }
 }

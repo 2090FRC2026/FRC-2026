@@ -4,7 +4,6 @@
 
 package frc.robot;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -14,21 +13,23 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.Constants.ShooterConstants;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import java.io.File;
 
-import java.util.function.DoubleSupplier;
+import com.google.flatbuffers.ShortVector;
 
 import swervelib.SwerveInputStream;
 
@@ -149,22 +150,14 @@ public class RobotContainer {
    * Flight joysticks}.
    */
   private void configureBindings() {
+    Command driveFieldOrientedDirectAngle = drivebase.driveFieldOriented(driveDirectAngle);
     Command driveFieldOrientedAnglularVelocity = drivebase.driveFieldOriented(driveAngularVelocity);
+    Command driveRobotOrientedAngularVelocity = drivebase.driveFieldOriented(driveRobotOriented);
     Command driveFieldOrientedDirectAngleKeyboard = drivebase.driveFieldOriented(driveDirectAngleKeyboard);
+    Command driveFieldOrientedAnglularVelocityKeyboard = drivebase.driveFieldOriented(driveAngularVelocityKeyboard);
 
-    final DoubleSupplier shooterRpmFromTriggers = () -> {
-      double right = MathUtil.applyDeadband(driverXbox.getHID().getRightTriggerAxis(), ShooterConstants.TRIGGER_DEADBAND);
-      double left = MathUtil.applyDeadband(driverXbox.getHID().getLeftTriggerAxis(), ShooterConstants.TRIGGER_DEADBAND);
-
-      double rpm = ShooterConstants.BASE_RPM + (right - left) * ShooterConstants.MAX_DELTA_RPM;
-      return MathUtil.clamp(rpm, ShooterConstants.MIN_RPM, ShooterConstants.MAX_RPM);
-    };
-
-    shooter.setDefaultCommand(shooter.runAtRPM(shooterRpmFromTriggers));
-
-    // Hood control: hold bumpers to move, release to stop
-    driverXbox.leftBumper().whileTrue(shooter.hoodDownWhileHeld());
-    driverXbox.rightBumper().whileTrue(shooter.hoodUpWhileHeld());
+    driverXbox.rightTrigger().whileTrue(intake.intakeCommand());
+    driverXbox.leftTrigger().whileTrue(intake.outtakeCommand());
 
 
     if (RobotBase.isSimulation()) {
@@ -203,11 +196,13 @@ public class RobotContainer {
       driverXbox.leftBumper().onTrue(Commands.none());
       driverXbox.rightBumper().onTrue(Commands.none());
     } else {
-      driverXbox.start().onTrue((Commands.runOnce(drivebase::zeroGyro)));
+      driverXbox.a().onTrue((Commands.runOnce(drivebase::zeroGyro)));
+      driverXbox.start().whileTrue(Commands.none());
       driverXbox.back().whileTrue(Commands.none());
-      driverXbox.x().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
-      driverXbox.a().whileTrue(intake.intakeCommand());
-      driverXbox.b().whileTrue(intake.outtakeCommand());
+      driverXbox.leftBumper().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
+      driverXbox.rightBumper().onTrue(Commands.none());
+      driverXbox.y().whileTrue(shooter.runAtRPM(3000));  
+      driverXbox.b().whileTrue(shooter.runMotors());
     }
 
   }
