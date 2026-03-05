@@ -13,23 +13,20 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.subsystems.Hood;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
+import frc.robot.subsystems.Transfer;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import java.io.File;
-
-import com.google.flatbuffers.ShortVector;
 
 import swervelib.SwerveInputStream;
 
@@ -51,6 +48,8 @@ public class RobotContainer {
 
   private final Shooter shooter = new Shooter();
   private final Intake intake = new Intake();
+  private final Hood hood = new Hood();
+  private final Transfer transfer = new Transfer();
 
   // Establish a Sendable Chooser that will be able to be sent to the
   // SmartDashboard, allowing selection of desired auto
@@ -156,8 +155,8 @@ public class RobotContainer {
     Command driveFieldOrientedDirectAngleKeyboard = drivebase.driveFieldOriented(driveDirectAngleKeyboard);
     Command driveFieldOrientedAnglularVelocityKeyboard = drivebase.driveFieldOriented(driveAngularVelocityKeyboard);
 
-    driverXbox.rightTrigger().whileTrue(intake.intakeCommand());
-    driverXbox.leftTrigger().whileTrue(intake.outtakeCommand());
+    driverXbox.rightTrigger().whileTrue(hood.variableHoodCommand(() -> driverXbox.getRightTriggerAxis()));
+    driverXbox.leftTrigger().whileTrue(hood.variableHoodCommand(() -> -driverXbox.getLeftTriggerAxis()));
 
 
     if (RobotBase.isSimulation()) {
@@ -199,10 +198,11 @@ public class RobotContainer {
       driverXbox.a().onTrue((Commands.runOnce(drivebase::zeroGyro)));
       driverXbox.start().whileTrue(Commands.none());
       driverXbox.back().whileTrue(Commands.none());
-      driverXbox.leftBumper().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
-      driverXbox.rightBumper().onTrue(Commands.none());
-      driverXbox.y().whileTrue(shooter.runAtRPM(3000));  
-      driverXbox.b().whileTrue(shooter.runMotors());
+      driverXbox.leftBumper().whileTrue(intake.intakeCommand());
+      driverXbox.rightBumper().whileTrue(intake.outtakeCommand());
+      driverXbox.y().whileTrue(shooter.runAtRPM(5000));
+      driverXbox.b().whileTrue(transfer.transferCommand());
+      driverXbox.x().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
     }
 
   }

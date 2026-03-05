@@ -11,7 +11,6 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -83,18 +82,8 @@ public class Shooter extends SubsystemBase {
     double targetRPS = rpm / 60.0;
     
     // Use the motor's built-in velocity PID
-    motor.setControl(velocityControl.withVelocity(targetRPS));
-    motor2.setControl(velocityControl.withVelocity(-targetRPS));
-  }
-
-  /**
-   * Set the motors to a power level (open loop).
-   * @param power Motor power from -1.0 to 1.0
-   */
-  public void setPower(double power) {
-    targetRPM = 0.0;
-    motor.setControl(dutyCycle.withOutput(MathUtil.clamp(power, -1.0, 1.0)));
-    motor2.setControl(dutyCycle.withOutput(MathUtil.clamp(-power, -1.0, 1.0)));
+    motor.setControl(velocityControl.withVelocity(-targetRPS));
+    motor2.setControl(velocityControl.withVelocity(targetRPS));
   }
 
   /**
@@ -182,14 +171,6 @@ public class Shooter extends SubsystemBase {
    */
   public Command runAtLowRPM() {
     return run(() -> this.setRPM(SHOOTER_RPM_LOW))
-        .finallyDo(() -> this.stop());
-  }
-
-  /**
-   * Command to run motors at a fixed power (open loop).
-   */
-  public Command runMotors() {
-    return run(() -> this.setPower(0.7))
         .finallyDo(() -> this.stop());
   }
 
