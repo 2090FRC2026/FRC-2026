@@ -10,6 +10,7 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -25,6 +26,7 @@ import frc.robot.LimelightHelpers;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Vector;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import swervelib.SwerveController;
@@ -43,6 +45,9 @@ public class SwerveSubsystem extends SubsystemBase {
    * Swerve drive object.
    */
   private final SwerveDrive swerveDrive;
+
+  //------CUSTOM VARIABLES------
+  private boolean isAutoAimMode;
 
   /**
    * Initialize {@link SwerveDrive} with the directory provided.
@@ -202,6 +207,23 @@ public class SwerveSubsystem extends SubsystemBase {
       DoubleSupplier angularRotationX) {
     return run(() -> {
       // Make the robot move
+      //Check if we are in auto aim mode
+      if(isAutoAimMode){
+        if(Math.abs(angularRotationX.getAsDouble()) < 0.1){
+          //Calculate angle to goal using serveDrive.getPose() and servedrive.getyaw
+          Translation2d goalLocation = new Translation2d(1.8156,1.5832);
+          swerveDrive.getPose().getTranslation();
+          //Use tanh as activation function (difference between angle to goal an current angle)
+          //set angularRotationX to result of tanh
+        }
+        
+        
+
+        else{
+          //Driver wants to rotate manually, disable auto-aim
+          isAutoAimMode = false;
+        }
+      }
       swerveDrive.drive(SwerveMath.scaleTranslation(new Translation2d(
           translationX.getAsDouble() * swerveDrive.getMaximumChassisVelocity(),
           translationY.getAsDouble() * swerveDrive.getMaximumChassisVelocity()), 0.8),
