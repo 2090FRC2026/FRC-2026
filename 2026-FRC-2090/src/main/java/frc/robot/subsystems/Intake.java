@@ -24,13 +24,13 @@ public class Intake extends SubsystemBase {
   private static final int INTAKE_DROPDOWN_ID = 19;
 
   // Intake speeds (adjust as needed)
-  private static final double INTAKE_SPEED = 0.8;
+  private static final double INTAKE_SPEED = 0.6;
   private static final double OUTTAKE_SPEED = -0.3;
-  private static final double SLOW_INTAKE_SPEED = 0.4;
+  private static final double SLOW_INTAKE_SPEED = 0.3;
 
   // Dropdown positions (motor rotations) - adjust to match your mechanism
-  private static final double DROPDOWN_POS_UP = -3.3583984375;
-  private static final double DROPDOWN_POS_DOWN = -0.00048828125;
+  private static final double DROPDOWN_POS_UP = -15.771240234375;
+  private static final double DROPDOWN_POS_DOWN = -12.993408203125;
 
   private final TalonFX motor;
   // Dropdown uses a Kraken X44 (TalonFX) and will be position-controlled
@@ -51,11 +51,11 @@ public class Intake extends SubsystemBase {
 
   // Configure dropdown motor PID for position control on its own slot
   // Reduced kP to avoid oscillation; tune on robot per instructions below
-  dropdownConfig.Slot0.kP = 0.1; // starting P
+  dropdownConfig.Slot0.kP = 2; // starting P
   dropdownConfig.Slot0.kI = 0.0;
   dropdownConfig.Slot0.kD = 0.0;
-  dropdownConfig.Slot0.kV = 0.0;
-  dropdownConfig.Slot0.kS = 0.0;
+  dropdownConfig.Slot0.kV = 10;
+  dropdownConfig.Slot0.kS = 10;
   dropdownConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
   dropdownConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
   dropdownMotor.getConfigurator().apply(dropdownConfig);
