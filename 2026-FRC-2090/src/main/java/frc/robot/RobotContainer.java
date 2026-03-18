@@ -27,12 +27,15 @@ import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Transfer;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import java.io.File;
+import java.util.jar.Attributes.Name;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.auto.NamedCommands;
 
 import swervelib.SwerveInputStream;
 
@@ -146,6 +149,13 @@ public class RobotContainer {
           },
           drivebase
       );
+        NamedCommands.registerCommand("RunIntake", intake.intakeCommand());
+        NamedCommands.registerCommand("SpinUpShooter", shooter.runAtRPM(3000));
+        NamedCommands.registerCommand("Shoot", transfer.transferCommand().withTimeout(0.75));
+
+        // NamedCommands.registerCommand("StopShooter", shooter.stopCommand());
+        // NamedCommands.registerCommand("StopIntake", intake.stopCommand());
+
       // Load all .auto files from deploy/pathplanner/autos/ automatically
       // "default_auto" becomes the default selection
       chooser = AutoBuilder.buildAutoChooser("default_auto");
