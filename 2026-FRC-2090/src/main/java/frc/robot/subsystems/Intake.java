@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -19,34 +20,102 @@ public class Intake extends SubsystemBase {
   private static final String kAppliedOutputEntry = "Intake Applied Output";
   private static final String kEncoderPositionEntry = "Intake Encoder Position";
 
-  // TODO: Update this CAN ID to match your intake motor
-  private static final int INTAKE_MOTOR_ID = 15;
+  private static final int INTAKE_MOTOR_ID = 30;
+  private static final int INTAKE_DROPDOWN_ID = 19;
 
   // Intake speeds (adjust as needed)
-  private static final double INTAKE_SPEED = 0.5;
+  private static final double INTAKE_SPEED = 0.8;
   private static final double OUTTAKE_SPEED = -0.3;
-  private static final double SLOW_INTAKE_SPEED = 0.25;
+  private static final double SLOW_INTAKE_SPEED = 0.4;
+
+  // Dropdown positions (motor rotations) - adjust to match your mechanism
+  private static final double DROPDOWN_POS_UP = -3.3583984375;
+  private static final double DROPDOWN_POS_DOWN = -0.00048828125;
 
   private final TalonFX motor;
+  // Dropdown uses a Kraken X44 (TalonFX) and will be position-controlled
+  private final TalonFX dropdownMotor;
+
+  private final PositionVoltage dropdownPosition = new PositionVoltage(0.0);
   private final DutyCycleOut dutyCycle = new DutyCycleOut(0.0);
   private final TalonFXConfiguration config = new TalonFXConfiguration();
+  private final TalonFXConfiguration dropdownConfig = new TalonFXConfiguration();
 
   public Intake() {
     motor = new TalonFX(INTAKE_MOTOR_ID);
+    dropdownMotor = new TalonFX(INTAKE_DROPDOWN_ID);
 
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-    motor.getConfigurator().apply(config);
+  motor.getConfigurator().apply(config);
+
+  // Configure dropdown motor PID for position control on its own slot
+  // Reduced kP to avoid oscillation; tune on robot per instructions below
+  dropdownConfig.Slot0.kP = 0.1; // starting P
+  dropdownConfig.Slot0.kI = 0.0;
+  dropdownConfig.Slot0.kD = 0.0;
+  dropdownConfig.Slot0.kV = 0.0;
+  dropdownConfig.Slot0.kS = 0.0;
+  dropdownConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+  dropdownConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+  dropdownMotor.getConfigurator().apply(dropdownConfig);
 
     motor.setPosition(0.0);
+    dropdownMotor.setPosition(DROPDOWN_POS_UP); // Start with dropdown in the up position
+    // Dropdown initial state: false = up, true = down
+    dropdownDown = false;
   }
+
+
+
+  // Tracks whether the dropdown is currently down
+  private boolean dropdownDown = false;
 
   /**
    * Set the intake motor power.
    * @param power Motor power from -1.0 to 1.0
    */
   public void setPower(double power) {
-    motor.setControl(dutyCycle.withOutput(MathUtil.clamp(power, -1.0, 1.0)));
+    motor.setControl(dutyCycle.withOutput(MathUtil.clamp(-power, -1.0, 1.0)));
+  }
+
+  /**
+   * Move the dropdown to a target position in motor rotations using closed-loop position control.
+   * @param rotations target in motor rotations
+   */
+  public void setDropdownPosition(double rotations) {
+    // PositionVoltage expects rotations (TalonFX native units here are rotations via getPosition())
+    dropdownMotor.setControl(dropdownPosition.withPosition(rotations));
+  }
+
+  /**
+   * Command wrapper to move dropdown to position (runOnce)
+   */
+  public edu.wpi.first.wpilibj2.command.Command moveDropdownTo(double rotations) {
+    return runOnce(() -> setDropdownPosition(rotations)).andThen(run(() -> {}).withTimeout(0.01));
+  }
+
+  /**
+   * Get dropdown current position in rotations
+   */
+  public double getDropdownPosition() {
+    return dropdownMotor.getPosition().getValueAsDouble();
+  }
+
+  /** Toggle dropdown between up and down positions. */
+  public void toggleDropdown() {
+    if (!dropdownDown) {
+      setDropdownPosition(DROPDOWN_POS_DOWN);
+      dropdownDown = true;
+    } else {
+      setDropdownPosition(DROPDOWN_POS_UP);
+      dropdownDown = false;
+    }
+  }
+
+  /** Command wrapper to toggle dropdown state on button press. */
+  public Command toggleDropdownCommand() {
+    return runOnce(this::toggleDropdown);
   }
 
   /**
@@ -69,6 +138,7 @@ public class Intake extends SubsystemBase {
   public void periodic() {
     SmartDashboard.putNumber(kAppliedOutputEntry, motor.getDutyCycle().getValueAsDouble());
     SmartDashboard.putNumber(kEncoderPositionEntry, motor.getPosition().getValueAsDouble());
+    SmartDashboard.putNumber("Intake Dropdown Position", getDropdownPosition());
   }
 
   // ===== Commands =====

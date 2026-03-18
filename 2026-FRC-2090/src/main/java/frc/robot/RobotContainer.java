@@ -18,7 +18,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -48,10 +47,10 @@ public class RobotContainer {
   private final SwerveSubsystem drivebase = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
       "swerve/falcon"));
 
-  // private final Shooter shooter = new Shooter();
-  // private final Intake intake = new Intake();
-  // private final Hood hood = new Hood();
-  // private final Transfer transfer = new Transfer();
+  private final Shooter shooter = new Shooter();
+  private final Intake intake = new Intake();
+  private final Hood hood = new Hood();
+  private final Transfer transfer = new Transfer();
 
   // Establish a Sendable Chooser that will be able to be sent to the
   // SmartDashboard, allowing selection of desired auto
@@ -92,7 +91,7 @@ public class RobotContainer {
       .deadband(OperatorConstants.DEADBAND)
       .scaleTranslation(0.8)
       .allianceRelativeControl(true);
-  // Derive the heading axis with math!
+  // Derive the heading axis with math! bro what is this ai comment
   SwerveInputStream driveDirectAngleKeyboard = driveAngularVelocityKeyboard.copy()
       .withControllerHeadingAxis(() -> Math.sin(
           driverXbox.getRawAxis(
@@ -154,14 +153,13 @@ public class RobotContainer {
     Command driveFieldOrientedAnglularVelocity = drivebase.driveFieldOriented(driveAngularVelocity);
     Command driveFieldOrientedDirectAngleKeyboard = drivebase.driveFieldOriented(driveDirectAngleKeyboard);
 
-    // ParallelCommandGroup readyScore = new ParallelCommandGroup(
-    //     shooter.runAtRPM(5000),
-    //     hood.variableHoodCommand(() -> driverXbox.getRightTriggerAxis()),
-    //     transfer.transferCommand());
+  driverXbox.rightTrigger().whileTrue(hood.variableHoodCommand(() -> driverXbox.getRightTriggerAxis()));
+  //driverXbox.leftTrigger().whileTrue(hood.variableHoodCommand(() -> -driverXbox.getLeftTriggerAxis()));
 
-    // driverXbox.rightTrigger().whileTrue(hood.variableHoodCommand(() -> driverXbox.getRightTriggerAxis()));
-    // driverXbox.leftTrigger().whileTrue(hood.variableHoodCommand(() -> -driverXbox.getLeftTriggerAxis()));
+  // Toggle intake dropdown when left trigger is pressed past 80%
+  new Trigger(() -> driverXbox.getLeftTriggerAxis() > 0.8).onTrue(intake.toggleDropdownCommand());
 
+    driverXbox.b().whileTrue(transfer.transferCommand());
 
     if (RobotBase.isSimulation()) {
       drivebase.setDefaultCommand(driveFieldOrientedDirectAngleKeyboard);
@@ -193,18 +191,17 @@ public class RobotContainer {
     if (DriverStation.isTest()) {
       drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity); 
 
-      driverXbox.x().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
-      driverXbox.start().onTrue((Commands.runOnce(drivebase::zeroGyro)));
-      driverXbox.back().whileTrue(drivebase.centerModulesCommand());
-      driverXbox.leftBumper().onTrue(Commands.none());
-      driverXbox.rightBumper().onTrue(Commands.none());
+      // driverXbox.x().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
+      // driverXbox.start().onTrue((Commands.runOnce(drivebase::zeroGyro)));
+      // driverXbox.back().whileTrue(drivebase.centerModulesCommand());
+      // driverXbox.leftBumper().onTrue(Commands.none());
+      // driverXbox.rightBumper().onTrue(Commands.none());
     } else {
       driverXbox.start().onTrue((Commands.runOnce(drivebase::zeroGyro)));
       driverXbox.back().whileTrue(Commands.none());
-      // driverXbox.leftBumper().whileTrue(intake.intakeCommand());
-      // driverXbox.rightBumper().whileTrue(intake.outtakeCommand());
-      // driverXbox.y().whileTrue(shooter.runAtRPM(5000));
-      // driverXbox.b().whileTrue(transfer.transferCommand());
+      driverXbox.leftBumper().whileTrue(intake.intakeCommand());
+      driverXbox.rightBumper().whileTrue(intake.outtakeCommand());
+      driverXbox.y().whileTrue(shooter.runAtRPM(2000));
       driverXbox.x().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
     }
 

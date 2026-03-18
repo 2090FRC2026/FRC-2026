@@ -17,12 +17,11 @@ public class Hood extends SubsystemBase {
 
     private final TalonFX hoodMotor;
 
-    // TODO: Set this to the actual CAN ID of your hood motor
-    private static final int HOOD_MOTOR_ID = 15;
+    private static final int HOOD_MOTOR_ID = 31;
 
     // Hood speed (adjust to taste)
-    private static final double HOOD_UP_SPEED = 0.3;
-    private static final double HOOD_DOWN_SPEED = -0.3;
+    private static final double HOOD_UP_SPEED = 0.1;
+    private static final double HOOD_DOWN_SPEED = -0.1;
 
     private final DutyCycleOut dutyCycle = new DutyCycleOut(0.0);
     private final TalonFXConfiguration config = new TalonFXConfiguration();
