@@ -20,7 +20,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.Hood;
@@ -29,6 +28,12 @@ import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Transfer;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import java.io.File;
+
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.PathPlannerPath;
 
 import swervelib.SwerveInputStream;
 
@@ -48,14 +53,14 @@ public class RobotContainer {
   private final SwerveSubsystem drivebase = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
       "swerve/falcon"));
 
-  // private final Shooter shooter = new Shooter();
-  // private final Intake intake = new Intake();
-  // private final Hood hood = new Hood();
-  // private final Transfer transfer = new Transfer();
+  private final Shooter shooter = new Shooter();
+  private final Intake intake = new Intake();
+  private final Hood hood = new Hood();
+  private final Transfer transfer = new Transfer();
 
   // Establish a Sendable Chooser that will be able to be sent to the
   // SmartDashboard, allowing selection of desired auto
-  private final SendableChooser<Command> autoChooser = new SendableChooser<>();
+  private final SendableChooser<Command> autoChooser;
 
   /**
    * Converts driver input into a field-relative ChassisSpeeds that is controlled
@@ -121,20 +126,37 @@ public class RobotContainer {
     configureBindings();
     DriverStation.silenceJoystickConnectionWarning(true);
 
-    // Set the default auto (do nothing)
-    autoChooser.setDefaultOption("Do Nothing", Commands.runOnce(drivebase::zeroGyroWithAlliance)
-        .andThen(Commands.none()));
-
-    // Add a simple auto option to have the robot drive forward for 1 second then
-    // stop
-    autoChooser.addOption("Drive Forward", Commands.runOnce(drivebase::zeroGyroWithAlliance).withTimeout(.2)
-        .andThen(drivebase.driveForward().withTimeout(1)));
-    // Put the autoChooser on the SmartDashboard
-    SmartDashboard.putData("Auto Chooser", autoChooser);
-
-    if (autoChooser.getSelected() == null) {
-      RobotModeTriggers.autonomous().onTrue(Commands.runOnce(drivebase::zeroGyroWithAlliance));
+    // Configure PathPlanner AutoBuilder with the swerve drivetrain
+    SendableChooser<Command> chooser;
+    try {
+      RobotConfig config = RobotConfig.fromGUISettings();
+      AutoBuilder.configure(
+          drivebase::getPose,                                    // Pose supplier
+          drivebase::resetOdometry,                             // Reset odometry
+          drivebase::getRobotVelocity,                          // Robot-relative ChassisSpeeds
+          (speeds, feedforwards) -> drivebase.drive(speeds),    // Drive method
+          new PPHolonomicDriveController(
+              new PIDConstants(5.0, 0.0, 0.0),                  // Translation PID
+              new PIDConstants(5.0, 0.0, 0.0)                   // Rotation PID
+          ),
+          config,
+          () -> {
+            // Flip paths for red alliance
+            var alliance = DriverStation.getAlliance();
+            return alliance.isPresent() && alliance.get() == DriverStation.Alliance.Red;
+          },
+          drivebase
+      );
+      // Load all .auto files from deploy/pathplanner/autos/ automatically
+      // "default_auto" becomes the default selection
+      chooser = AutoBuilder.buildAutoChooser("default_auto");
+    } catch (Exception e) {
+      System.err.println("Failed to configure PathPlanner AutoBuilder: " + e.getMessage());
+      chooser = new SendableChooser<>();
+      chooser.setDefaultOption("Do Nothing", Commands.runOnce(drivebase::zeroGyroWithAlliance));
     }
+    autoChooser = chooser;
+    SmartDashboard.putData("Auto Chooser", autoChooser);
   }
 
   /** 
