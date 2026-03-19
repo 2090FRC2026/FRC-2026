@@ -33,7 +33,7 @@ public class Shooter extends SubsystemBase {
   private static final double kS = 0.1;   // Feedforward static friction (volts) // 0.1
 
   // Target RPM presets
-  public double SHOOTER_RPM = 4000.0;
+  public double SHOOTER_RPM = 3000.0;
   public double SHOOTER_RPM_LOW = 1500.0;
 
   private final TalonFX motor;
