@@ -176,6 +176,7 @@ public class RobotContainer {
       chooser = AutoBuilder.buildAutoChooser("default_auto");
     } catch (Exception e) {
       System.err.println("Failed to configure PathPlanner AutoBuilder: " + e.getMessage());
+      e.printStackTrace();
       chooser = new SendableChooser<>();
       chooser.setDefaultOption("Do Nothing", Commands.runOnce(drivebase::zeroGyroWithAlliance));
     }
