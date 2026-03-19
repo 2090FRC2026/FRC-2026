@@ -23,9 +23,28 @@
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "Score path1"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Score path1"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "RunIntakeContinuous"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "RunShooterContinuous"
+                }
+              }
+            ]
           }
         },
         {
@@ -41,9 +60,28 @@
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "Score path2"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Score path2"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "RunIntakeContinuous"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "RunShooterContinuous"
+                }
+              }
+            ]
           }
         },
         {
@@ -59,9 +97,28 @@
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": " Score path3"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": " Score path3"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "RunIntakeContinuous"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "RunShooterContinuous"
+                }
+              }
+            ]
           }
         }
       ]
