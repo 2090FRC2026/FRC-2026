@@ -83,9 +83,10 @@ public class Intake extends SubsystemBase {
    * Move the dropdown to a target position in motor rotations using closed-loop position control.
    * @param rotations target in motor rotations
    */
-  public void setDropdownPosition(double rotations) {
+  public Command setDropdownPosition(double rotations) {
     // PositionVoltage expects rotations (TalonFX native units here are rotations via getPosition())
-    dropdownMotor.setControl(dropdownPosition.withPosition(rotations));
+    return run(() -> dropdownMotor.setControl(dropdownPosition.withPosition(rotations)));
+
   }
 
   /**

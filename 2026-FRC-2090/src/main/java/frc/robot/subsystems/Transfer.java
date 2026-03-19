@@ -88,6 +88,11 @@ public class Transfer extends SubsystemBase {
         .finallyDo(() -> this.stop());
   }
 
+  public Command transferReverseCommand() {
+    return run(() -> this.setPower(TRANSFER_SPEED))
+        .finallyDo(() -> this.stop());
+  }
+
   /**
    * Command to run the transfer at a slow speed.
    */

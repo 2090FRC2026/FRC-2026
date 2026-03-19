@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.Hood;
@@ -153,6 +154,7 @@ public class RobotContainer {
           drivebase
       );
         NamedCommands.registerCommand("RunIntake", intake.intakeCommand());
+        NamedCommands.registerCommand("DropdownIntake", intake.setDropdownPosition(-11.90576171875));
         NamedCommands.registerCommand("SpinUpShooter", shooter.runAtRPM(3000));
         NamedCommands.registerCommand("Shoot", transfer.transferCommand().withTimeout(0.75));
         
@@ -162,7 +164,7 @@ public class RobotContainer {
 
       // Load all .auto files from deploy/pathplanner/autos/ automatically
       // "default_auto" becomes the default selection
-      chooser = AutoBuilder.buildAutoChooser("default_auto");
+      chooser = AutoBuilder.buildAutoChooser("Copy of Copy of pass_auto");
     } catch (Exception e) {
       System.err.println("Failed to configure PathPlanner AutoBuilder: " + e.getMessage());
       chooser = new SendableChooser<>();
@@ -237,7 +239,9 @@ public class RobotContainer {
       driverXbox.leftBumper().whileTrue(intake.intakeCommand());
       driverXbox.rightBumper().whileTrue(intake.outtakeCommand());
       driverXbox.y().whileTrue(transferShooterCommand);
-      driverXbox.x().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
+      driverXbox.x().onTrue(shooter.addRPM());
+      driverXbox.b().whileTrue(transfer.transferReverseCommand());
+      //driverXbox.x().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
     }
 
   }
