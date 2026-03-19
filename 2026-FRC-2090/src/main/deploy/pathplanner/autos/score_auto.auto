@@ -19,7 +19,7 @@
         {
           "type": "named",
           "data": {
-            "name": "SpinUpShooter"
+            "name": "SpinUpShooterScore"
           }
         },
         {
@@ -41,7 +41,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "RunShooterContinuous"
+                  "name": "RunShooterContinuousScore"
                 }
               }
             ]
@@ -78,7 +78,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "RunShooterContinuous"
+                  "name": "RunShooterContinuousScore"
                 }
               }
             ]
@@ -115,7 +115,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "RunShooterContinuous"
+                  "name": "RunShooterContinuousScore"
                 }
               }
             ]

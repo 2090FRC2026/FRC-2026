@@ -19,7 +19,7 @@
         {
           "type": "named",
           "data": {
-            "name": "SpinUpShooter"
+            "name": "SpinUpShooterPass"
           }
         },
         {
@@ -41,7 +41,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "RunShooterContinuous"
+                  "name": "RunShooterContinuousPass"
                 }
               }
             ]
