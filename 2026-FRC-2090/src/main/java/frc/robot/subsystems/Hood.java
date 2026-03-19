@@ -20,8 +20,8 @@ public class Hood extends SubsystemBase {
     private static final int HOOD_MOTOR_ID = 31;
 
     // Hood speed (adjust to taste)
-    private static final double HOOD_UP_SPEED = 0.1;
-    private static final double HOOD_DOWN_SPEED = -0.1;
+    private static final double HOOD_UP_SPEED = 0.001;
+    private static final double HOOD_DOWN_SPEED = -0.001;
 
     private final DutyCycleOut dutyCycle = new DutyCycleOut(0.0);
     private final TalonFXConfiguration config = new TalonFXConfiguration();
@@ -85,7 +85,7 @@ public class Hood extends SubsystemBase {
      * @param speedSupplier Supplier of speed value from -1.0 to 1.0
      */
     public Command variableHoodCommand(DoubleSupplier speedSupplier) {
-        return run(() -> setPower(speedSupplier.getAsDouble()))
+        return run(() -> setPower(speedSupplier.getAsDouble() * 0.1))
             .finallyDo(() -> stop());
     }
 }

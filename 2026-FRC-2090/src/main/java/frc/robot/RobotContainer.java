@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
@@ -36,6 +37,8 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.auto.NamedCommands;
+
+import frc.robot.commands.ShooterTransferCommand;
 
 import swervelib.SwerveInputStream;
 
@@ -152,7 +155,8 @@ public class RobotContainer {
         NamedCommands.registerCommand("RunIntake", intake.intakeCommand());
         NamedCommands.registerCommand("SpinUpShooter", shooter.runAtRPM(3000));
         NamedCommands.registerCommand("Shoot", transfer.transferCommand().withTimeout(0.75));
-
+        
+        // these dont exist because we never turn them off >:)
         // NamedCommands.registerCommand("StopShooter", shooter.stopCommand());
         // NamedCommands.registerCommand("StopIntake", intake.stopCommand());
 
@@ -184,14 +188,13 @@ public class RobotContainer {
   private void configureBindings() {
     Command driveFieldOrientedAnglularVelocity = drivebase.driveFieldOriented(driveAngularVelocity);
     Command driveFieldOrientedDirectAngleKeyboard = drivebase.driveFieldOriented(driveDirectAngleKeyboard);
+    Command transferShooterCommand = new ShooterTransferCommand(shooter, transfer);
 
   driverXbox.rightTrigger().whileTrue(hood.variableHoodCommand(() -> driverXbox.getRightTriggerAxis()));
   driverXbox.leftTrigger().whileTrue(hood.variableHoodCommand(() -> -driverXbox.getLeftTriggerAxis()));
 
-  // Toggle intake dropdown when left trigger is pressed past 80%
-  new Trigger(() -> driverXbox.getLeftTriggerAxis() > 0.8).onTrue(intake.toggleDropdownCommand());
-
-    driverXbox.b().whileTrue(transfer.transferCommand());
+  // Toggle intake dropdown & transfer state with the A button
+   driverXbox.a().onTrue(intake.toggleDropdownCommand());
 
     if (RobotBase.isSimulation()) {
       drivebase.setDefaultCommand(driveFieldOrientedDirectAngleKeyboard);
@@ -233,7 +236,7 @@ public class RobotContainer {
       driverXbox.back().whileTrue(Commands.none());
       driverXbox.leftBumper().whileTrue(intake.intakeCommand());
       driverXbox.rightBumper().whileTrue(intake.outtakeCommand());
-      driverXbox.y().whileTrue(shooter.runAtRPM(2000));
+      driverXbox.y().whileTrue(transferShooterCommand);
       driverXbox.x().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
     }
 
