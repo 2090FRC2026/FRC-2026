@@ -46,7 +46,7 @@ public class Hood extends SubsystemBase {
         config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
         hoodMotor.getConfigurator().apply(config);
-        hoodMotor.setPosition(0.0);
+        hoodMotor.setPosition(HOOD_POS_DOWN);
 
         stop();
     }
@@ -76,7 +76,7 @@ public class Hood extends SubsystemBase {
         UP, MIDDLE, DOWN
     }
 
-    private HoodPosition currentHoodPosition = HoodPosition.UP;
+    private HoodPosition currentHoodPosition = HoodPosition.DOWN;
     
     /** Toggle hood between up, mid, and down positions. */
     public void toggleHood() {

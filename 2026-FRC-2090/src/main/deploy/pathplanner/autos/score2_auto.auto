@@ -5,6 +5,25 @@
     "data": {
       "commands": [
         {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "SpinUpShooterScore"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Shoot"
+                }
+              }
+            ]
+          }
+        },
+        {
           "type": "named",
           "data": {
             "name": "DropdownIntake"
@@ -17,19 +36,19 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Score path1"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "RunIntakeContinuous"
+                  "pathName": "score2 path1"
                 }
               },
               {
                 "type": "named",
                 "data": {
                   "name": "RunShooterContinuousScore"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "RunIntake"
                 }
               }
             ]
@@ -48,19 +67,19 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Score path2"
+                  "pathName": "score2 path2"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "RunIntakeContinuous"
+                  "name": "RunShooterContinuousPass"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "RunShooterContinuousScore"
+                  "name": "RunIntake"
                 }
               }
             ]
@@ -79,22 +98,34 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": " Score path3"
+                  "pathName": "score2 path3"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "RunIntakeContinuous"
+                  "name": "RunShooterContinuousPass"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "RunShooterContinuousScore"
+                  "name": "RunIntake"
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "score2 path4"
           }
         }
       ]

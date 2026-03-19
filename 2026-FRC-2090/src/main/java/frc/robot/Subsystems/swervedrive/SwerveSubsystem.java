@@ -102,10 +102,11 @@ public class SwerveSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Angle D", lastAngleD);
     swerveDrive.setModuleEncoderAutoSynchronize(false,
         1); // Enable if you want to resynchronize your absolute encoders and motor encoders
-            // periodically when they are not moving.
+            // periodically when they are not moving47.
     // swerveDrive.pushOffsetsToEncoders(); // Set the absolute encoder to be used
     // over the internal encoder and push the offsets onto it. Throws warning if not
-    // possible
+    // 
+    swerveDrive.setAutoCenteringModules(true);
   }
 
   /**
@@ -130,11 +131,11 @@ public class SwerveSubsystem extends SubsystemBase {
 
       // Get the pose estimate
       LimelightHelpers.PoseEstimate limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
-      
-      double ty = LimelightHelpers.getTY("limelight");
+      double ty = 0.0;
 
       if (limelightMeasurement.tagCount > 0) {
-        swerveDrive.addVisionMeasurement(limelightMeasurement.pose, limelightMeasurement.timestampSeconds);
+        // swerveDrive.addVisionMeasurement(limelightMeasurement.pose, limelightMeasurement.timestampSeconds);
+        ty = LimelightHelpers.getTY("limelight");
       }
       // Add it to your pose estimator
       // m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.5, .5, 9999999));

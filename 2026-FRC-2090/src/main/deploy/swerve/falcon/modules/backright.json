@@ -3,14 +3,14 @@
     "front": -12,
     "left": -12
   },
-  "absoluteEncoderOffset": 126.21,
+  "absoluteEncoderOffset": 141.59196,
   "drive": {
-    "type": "falcon500",
+    "type": "krakenx60",
     "id": 14,
     "canbus": null
   },
   "angle": {
-    "type": "falcon500",
+    "type": "krakenx60",
     "id": 1,
     "canbus": null
   },

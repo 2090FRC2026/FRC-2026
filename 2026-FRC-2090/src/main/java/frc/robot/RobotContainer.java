@@ -156,16 +156,16 @@ public class RobotContainer {
       );
         NamedCommands.registerCommand("RunIntake", intake.intakeCommand().withTimeout(1));
         NamedCommands.registerCommand("RunIntakeContinuous", intake.intakeCommand());
-        NamedCommands.registerCommand("DropdownIntake", intake.setDropdownPosition(-11.90576171875).withTimeout(1));
-        NamedCommands.registerCommand("SpinUpShooter", shooter.runAtRPM(3000).withTimeout(3));
-        NamedCommands.registerCommand("RunShooterContinuous", shooter.runAtRPM(3000));
+        NamedCommands.registerCommand("DropdownIntake", intake.setDropdownPosition(-11.90576171875).withTimeout(0.2));
+        NamedCommands.registerCommand("SpinUpShooter", shooter.runAtRPM(2000).withTimeout(3));
+        NamedCommands.registerCommand("RunShooterContinuous", shooter.runAtRPM(2000));
         // Pass auto: 4000 RPM
-        NamedCommands.registerCommand("SpinUpShooterPass", shooter.runAtRPM(4000).withTimeout(3));
-        NamedCommands.registerCommand("RunShooterContinuousPass", shooter.runAtRPM(4000));
+        NamedCommands.registerCommand("SpinUpShooterPass", shooter.runAtRPM(3000).withTimeout(3));
+        NamedCommands.registerCommand("RunShooterContinuousPass", shooter.runAtRPM(3000));
         // Score auto: 2250 RPM
         NamedCommands.registerCommand("SpinUpShooterScore", shooter.runAtRPM(2250).withTimeout(3));
         NamedCommands.registerCommand("RunShooterContinuousScore", shooter.runAtRPM(2250));
-        NamedCommands.registerCommand("Shoot", transfer.transferCommand().withTimeout(0.75));
+        NamedCommands.registerCommand("Shoot", transfer.transferCommand().withTimeout(3));
         
         // these dont exist because we never turn them off >:)
         // NamedCommands.registerCommand("StopShooter", shooter.stopCommand());
@@ -173,7 +173,7 @@ public class RobotContainer {
 
       // Load all .auto files from deploy/pathplanner/autos/ automatically
       // "default_auto" becomes the default selection
-      chooser = AutoBuilder.buildAutoChooser("default_auto");
+      chooser = AutoBuilder.buildAutoChooser("test");
     } catch (Exception e) {
       System.err.println("Failed to configure PathPlanner AutoBuilder: " + e.getMessage());
       e.printStackTrace();
