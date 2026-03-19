@@ -105,13 +105,13 @@ public class Intake extends SubsystemBase {
 
   /** Toggle dropdown between up and down positions. */
   public void toggleDropdown() {
-    if (!dropdownDown) {
-      setDropdownPosition(DROPDOWN_POS_DOWN);
-      dropdownDown = true;
-    } else {
-      setDropdownPosition(DROPDOWN_POS_UP);
-      dropdownDown = false;
-    }
+      if (!dropdownDown) {
+          dropdownMotor.setControl(dropdownPosition.withPosition(DROPDOWN_POS_DOWN));
+          dropdownDown = true;
+      } else {
+          dropdownMotor.setControl(dropdownPosition.withPosition(DROPDOWN_POS_UP));
+          dropdownDown = false;
+      }
   }
 
   /** Command wrapper to toggle dropdown state on button press. */
