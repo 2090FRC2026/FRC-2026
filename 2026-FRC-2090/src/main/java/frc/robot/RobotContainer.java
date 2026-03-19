@@ -201,8 +201,13 @@ public class RobotContainer {
     Command driveFieldOrientedDirectAngleKeyboard = drivebase.driveFieldOriented(driveDirectAngleKeyboard);
     Command transferShooterCommand = new ShooterTransferCommand(shooter, transfer);
 
-  driverXbox.rightTrigger().whileTrue(hood.variableHoodCommand(() -> driverXbox.getRightTriggerAxis()));
-  driverXbox.leftTrigger().whileTrue(hood.variableHoodCommand(() -> -driverXbox.getLeftTriggerAxis()));
+   driverXbox.rightTrigger().whileTrue(hood.variableHoodCommand(() -> driverXbox.getRightTriggerAxis()));
+   driverXbox.leftTrigger().whileTrue(hood.variableHoodCommand(() -> -driverXbox.getLeftTriggerAxis()));
+   
+   // Hood position presets via D-pad
+   driverXbox.povUp().onTrue(new InstantCommand(() -> hood.setHoodUp(), hood));
+   driverXbox.povRight().onTrue(new InstantCommand(() -> hood.setHoodMiddle(), hood));
+   driverXbox.povDown().onTrue(new InstantCommand(() -> hood.setHoodDown(), hood));
 
   // Toggle intake dropdown & transfer state with the A button
    driverXbox.a().onTrue(intake.toggleDropdownCommand());
