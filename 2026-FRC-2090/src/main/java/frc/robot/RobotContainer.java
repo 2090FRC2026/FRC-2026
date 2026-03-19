@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
@@ -154,17 +155,9 @@ public class RobotContainer {
           },
           drivebase
       );
-        NamedCommands.registerCommand("RunIntake", intake.intakeCommand().withTimeout(1));
-        NamedCommands.registerCommand("RunIntakeContinuous", intake.intakeCommand());
-        NamedCommands.registerCommand("DropdownIntake", intake.setDropdownPosition(-11.90576171875).withTimeout(1));
-        NamedCommands.registerCommand("SpinUpShooter", shooter.runAtRPM(3000).withTimeout(3));
-        NamedCommands.registerCommand("RunShooterContinuous", shooter.runAtRPM(3000));
-        // Pass auto: 4000 RPM
-        NamedCommands.registerCommand("SpinUpShooterPass", shooter.runAtRPM(4000).withTimeout(3));
-        NamedCommands.registerCommand("RunShooterContinuousPass", shooter.runAtRPM(4000));
-        // Score auto: 2250 RPM
-        NamedCommands.registerCommand("SpinUpShooterScore", shooter.runAtRPM(2250).withTimeout(3));
-        NamedCommands.registerCommand("RunShooterContinuousScore", shooter.runAtRPM(2250));
+        NamedCommands.registerCommand("RunIntake", intake.intakeCommand());
+        NamedCommands.registerCommand("DropdownIntake", intake.setDropdownPosition(-11.90576171875));
+        NamedCommands.registerCommand("SpinUpShooter", shooter.runAtRPM(4000));
         NamedCommands.registerCommand("Shoot", transfer.transferCommand().withTimeout(0.75));
         
         // these dont exist because we never turn them off >:)
@@ -173,7 +166,7 @@ public class RobotContainer {
 
       // Load all .auto files from deploy/pathplanner/autos/ automatically
       // "default_auto" becomes the default selection
-      chooser = AutoBuilder.buildAutoChooser("pass_auto");
+      chooser = AutoBuilder.buildAutoChooser("Copy of Copy of pass_auto");
     } catch (Exception e) {
       System.err.println("Failed to configure PathPlanner AutoBuilder: " + e.getMessage());
       chooser = new SendableChooser<>();
