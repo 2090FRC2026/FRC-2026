@@ -164,7 +164,7 @@ public class RobotContainer {
 
       // Load all .auto files from deploy/pathplanner/autos/ automatically
       // "default_auto" becomes the default selection
-      chooser = AutoBuilder.buildAutoChooser("Copy of Copy of pass_auto");
+      chooser = AutoBuilder.buildAutoChooser("pass_auto");
     } catch (Exception e) {
       System.err.println("Failed to configure PathPlanner AutoBuilder: " + e.getMessage());
       chooser = new SendableChooser<>();

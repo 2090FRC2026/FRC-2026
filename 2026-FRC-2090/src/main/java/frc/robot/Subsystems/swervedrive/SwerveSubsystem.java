@@ -125,7 +125,7 @@ public class SwerveSubsystem extends SubsystemBase {
       // );
       SmartDashboard.putNumber("Limelight X",  swerveDrive.getPose().getX());
       SmartDashboard.putNumber("Limelight Y", swerveDrive.getPose().getY());
-      SmartDashboard.putNumber("Limelight ty", LimelightHelpers.ty);
+      SmartDashboard.putNumber("Limelight ty", LimelightHelpers.getTY("limelight"));
   }
 
   @Override
