@@ -23,9 +23,28 @@
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "Pass"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Pass"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "RunIntakeContinuous"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "RunShooterContinuous"
+                }
+              }
+            ]
           }
         },
         {

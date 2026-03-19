@@ -154,8 +154,10 @@ public class RobotContainer {
           drivebase
       );
         NamedCommands.registerCommand("RunIntake", intake.intakeCommand().withTimeout(1));
+        NamedCommands.registerCommand("RunIntakeContinuous", intake.intakeCommand());
         NamedCommands.registerCommand("DropdownIntake", intake.setDropdownPosition(-11.90576171875).withTimeout(1));
         NamedCommands.registerCommand("SpinUpShooter", shooter.runAtRPM(4000).withTimeout(3));
+        NamedCommands.registerCommand("RunShooterContinuous", shooter.runAtRPM(4000));
         NamedCommands.registerCommand("Shoot", transfer.transferCommand().withTimeout(0.75));
         
         // these dont exist because we never turn them off >:)
