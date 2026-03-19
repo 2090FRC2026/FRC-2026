@@ -113,6 +113,7 @@ public class SwerveSubsystem extends SubsystemBase {
       // Get the pose estimate
       LimelightHelpers.PoseEstimate limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
       
+      double ty = LimelightHelpers.getTY("limelight");
 
       if (limelightMeasurement.tagCount > 0) {
         swerveDrive.addVisionMeasurement(limelightMeasurement.pose, limelightMeasurement.timestampSeconds);
@@ -125,7 +126,7 @@ public class SwerveSubsystem extends SubsystemBase {
       // );
       SmartDashboard.putNumber("Limelight X",  swerveDrive.getPose().getX());
       SmartDashboard.putNumber("Limelight Y", swerveDrive.getPose().getY());
-      SmartDashboard.putNumber("Limelight ty", LimelightHelpers.getTY("limelight"));
+      SmartDashboard.putNumber("Limelight ty", ty);
   }
 
   @Override

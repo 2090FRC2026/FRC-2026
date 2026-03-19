@@ -29,9 +29,8 @@ public class Intake extends SubsystemBase {
   private static final double SLOW_INTAKE_SPEED = 0.3;
 
   // Dropdown positions (motor rotations) - adjust to match your mechanism
-  private static final double DROPDOWN_POS_UP = -14.63232421875;
-  private static final double DROPDOWN_POS_DOWN = -11.90576171875;
-
+  private static final double DROPDOWN_POS_UP = -13.755126953125;
+  private static final double DROPDOWN_POS_DOWN = -10.985595703125;
   private final TalonFX motor;
   // Dropdown uses a Kraken X44 (TalonFX) and will be position-controlled
   private final TalonFX dropdownMotor;

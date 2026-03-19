@@ -33,8 +33,8 @@ public class Shooter extends SubsystemBase {
   private static final double kS = 0.1;   // Feedforward static friction (volts) // 0.1
 
   // Target RPM presets
-  public static final double SHOOTER_RPM = 4000.0;
-  public static final double SHOOTER_RPM_LOW = 1500.0;
+  public double SHOOTER_RPM = 4000.0;
+  public double SHOOTER_RPM_LOW = 1500.0;
 
   private final TalonFX motor;
   private final TalonFX motor2;
@@ -145,6 +145,7 @@ public class Shooter extends SubsystemBase {
     SmartDashboard.putNumber(kAppliedOutputEntry, motor.getDutyCycle().getValueAsDouble());
     SmartDashboard.putNumber(kVelocityEntry, getVelocityRPM());
     SmartDashboard.putNumber(kTargetVelocityEntry, targetRPM);
+    SmartDashboard.putNumber(kTargetVelocityEntry, SHOOTER_RPM);
   }
 
   // ===== Commands =====
@@ -184,6 +185,6 @@ public class Shooter extends SubsystemBase {
   }
 
   public Command addRPM() {
-    return runOnce(() -> this.targetRPM += 10);
+    return runOnce(() -> this.SHOOTER_RPM += 10);
   }
 }
