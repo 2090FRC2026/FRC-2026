@@ -7,6 +7,7 @@ import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.controls.PositionVoltage;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -23,11 +24,23 @@ public class Hood extends SubsystemBase {
     private static final double HOOD_UP_SPEED = 0.001;
     private static final double HOOD_DOWN_SPEED = -0.001;
 
+    // Hood positions (adjust as needed)
+    private static final double HOOD_POS_DOWN = 0.0;
+    private static final double HOOD_POS_MID = 1.5;
+    private static final double HOOD_POS_UP = 3.0;
+
     private final DutyCycleOut dutyCycle = new DutyCycleOut(0.0);
+    private final PositionVoltage hoodPosition = new PositionVoltage(0.0);
     private final TalonFXConfiguration config = new TalonFXConfiguration();
 
     public Hood() {
         hoodMotor = new TalonFX(HOOD_MOTOR_ID);
+
+        config.Slot0.kP = 2.0;
+        config.Slot0.kI = 0.0;
+        config.Slot0.kD = 0.0;
+        config.Slot0.kV = 10;
+        config.Slot0.kS = 10;  
 
         config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
@@ -59,6 +72,34 @@ public class Hood extends SubsystemBase {
         return hoodMotor.getPosition().getValueAsDouble();
     }
 
+    public enum HoodPosition {
+        UP, MIDDLE, DOWN
+    }
+
+    private HoodPosition currentHoodPosition = HoodPosition.UP;
+    
+    /** Toggle hood between up, mid, and down positions. */
+    public void toggleHood() {
+        switch (currentHoodPosition) {
+            case UP:
+                hoodMotor.setControl(hoodPosition.withPosition(HOOD_POS_MID));
+                currentHoodPosition = HoodPosition.MIDDLE;
+                break;
+            case MIDDLE:
+                hoodMotor.setControl(hoodPosition.withPosition(HOOD_POS_DOWN));
+                currentHoodPosition = HoodPosition.DOWN;
+                break;
+            case DOWN:
+                hoodMotor.setControl(hoodPosition.withPosition(HOOD_POS_UP));
+                currentHoodPosition = HoodPosition.UP;
+                break;
+        }
+    }
+
+    public void setHoodUp()     { hoodMotor.setControl(hoodPosition.withPosition(HOOD_POS_UP));   currentHoodPosition = HoodPosition.UP; }
+    public void setHoodMiddle() { hoodMotor.setControl(hoodPosition.withPosition(HOOD_POS_MID));  currentHoodPosition = HoodPosition.MIDDLE; }
+    public void setHoodDown()   { hoodMotor.setControl(hoodPosition.withPosition(HOOD_POS_DOWN)); currentHoodPosition = HoodPosition.DOWN; }
+
     @Override
     public void periodic() {
         SmartDashboard.putNumber("Hood Position", getPosition());
@@ -77,6 +118,10 @@ public class Hood extends SubsystemBase {
     public Command hoodDownCommand() {
         return run(() -> setPower(HOOD_DOWN_SPEED))
             .finallyDo(() -> stop());
+    }
+
+    public Command toggleHoodCommand() {
+        return runOnce(this::toggleHood);
     }
 
     /**
