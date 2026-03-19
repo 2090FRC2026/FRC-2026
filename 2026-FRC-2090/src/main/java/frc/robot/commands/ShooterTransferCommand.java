@@ -9,7 +9,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 public class ShooterTransferCommand extends ParallelCommandGroup {
     public ShooterTransferCommand(Shooter shooter, Transfer transfer) {
         addCommands(
-            shooter.runAtRPM(2000),
+            shooter.runAtRPM(4000),
             transfer.transferCommand()
         );
         // Optionally set a timeout:

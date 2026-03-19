@@ -155,7 +155,7 @@ public class RobotContainer {
       );
         NamedCommands.registerCommand("RunIntake", intake.intakeCommand());
         NamedCommands.registerCommand("DropdownIntake", intake.setDropdownPosition(-11.90576171875));
-        NamedCommands.registerCommand("SpinUpShooter", shooter.runAtRPM(3000));
+        NamedCommands.registerCommand("SpinUpShooter", shooter.runAtRPM(4000));
         NamedCommands.registerCommand("Shoot", transfer.transferCommand().withTimeout(0.75));
         
         // these dont exist because we never turn them off >:)
