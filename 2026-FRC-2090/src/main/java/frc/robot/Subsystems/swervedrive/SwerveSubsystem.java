@@ -32,7 +32,9 @@ import java.util.function.Supplier;
 import swervelib.SwerveController;
 import swervelib.SwerveDrive;
 import swervelib.SwerveDriveTest;
+import swervelib.SwerveModule;
 import swervelib.math.SwerveMath;
+import swervelib.parser.PIDFConfig;
 import swervelib.parser.SwerveControllerConfiguration;
 import swervelib.parser.SwerveDriveConfiguration;
 import swervelib.parser.SwerveParser;
@@ -48,6 +50,10 @@ public class SwerveSubsystem extends SubsystemBase {
 
   //------CUSTOM VARIABLES------
   private boolean isAutoAimMode;
+
+  // Tunable PID values (initialized from JSON, editable via Shuffleboard)
+  private double lastDriveP, lastDriveD;
+  private double lastAngleP, lastAngleD;
 
   /**
    * Initialize {@link SwerveDrive} with the directory provided.
@@ -82,6 +88,18 @@ public class SwerveSubsystem extends SubsystemBase {
         true,
         0.1); // Correct for skew that gets worse as angular velocity increases. Start with a
               // coefficient of 0.1.
+
+    // Publish initial PID values to Shuffleboard for tuning
+    PIDFConfig drivePID = swerveDrive.getModules()[0].getDrivePIDF();
+    PIDFConfig anglePID = swerveDrive.getModules()[0].getAnglePIDF();
+    lastDriveP = drivePID.p;
+    lastDriveD = drivePID.d;
+    lastAngleP = anglePID.p;
+    lastAngleD = anglePID.d;
+    SmartDashboard.putNumber("Drive P", lastDriveP);
+    SmartDashboard.putNumber("Drive D", lastDriveD);
+    SmartDashboard.putNumber("Angle P", lastAngleP);
+    SmartDashboard.putNumber("Angle D", lastAngleD);
     swerveDrive.setModuleEncoderAutoSynchronize(false,
         1); // Enable if you want to resynchronize your absolute encoders and motor encoders
             // periodically when they are not moving.
@@ -127,6 +145,27 @@ public class SwerveSubsystem extends SubsystemBase {
       SmartDashboard.putNumber("Limelight X",  swerveDrive.getPose().getX());
       SmartDashboard.putNumber("Limelight Y", swerveDrive.getPose().getY());
       SmartDashboard.putNumber("Limelight ty", ty);
+
+      // Read PID values from Shuffleboard and apply if changed
+      double driveP = SmartDashboard.getNumber("Drive P", lastDriveP);
+      double driveD = SmartDashboard.getNumber("Drive D", lastDriveD);
+      double angleP = SmartDashboard.getNumber("Angle P", lastAngleP);
+      double angleD = SmartDashboard.getNumber("Angle D", lastAngleD);
+
+      if (driveP != lastDriveP || driveD != lastDriveD) {
+        lastDriveP = driveP;
+        lastDriveD = driveD;
+        for (SwerveModule module : swerveDrive.getModules()) {
+          module.setDrivePIDF(new PIDFConfig(driveP, 0, driveD, 0, 0));
+        }
+      }
+      if (angleP != lastAngleP || angleD != lastAngleD) {
+        lastAngleP = angleP;
+        lastAngleD = angleD;
+        for (SwerveModule module : swerveDrive.getModules()) {
+          module.setAnglePIDF(new PIDFConfig(angleP, 0, angleD, 0, 0));
+        }
+      }
   }
 
   @Override
