@@ -182,4 +182,8 @@ public class Shooter extends SubsystemBase {
     return runOnce(() -> this.setRPM(rpm))
         .andThen(run(() -> {}).until(() -> this.atTargetRPM()));
   }
+
+  public Command addRPM() {
+    return runOnce(() -> this.targetRPM += 10);
+  }
 }
